@@ -1,12 +1,9 @@
 from telethon import TelegramClient, events
-from dotenv import load_dotenv
 import os
 
-load_dotenv()  # Carica il file .env
-
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
-session_name = os.getenv("SESSION_NAME")
+api_id = int(os.environ['API_ID'])
+api_hash = os.environ['API_HASH']
+session_name = 'session'  # Il file si chiama session.session
 
 client = TelegramClient(session_name, api_id, api_hash)
 
