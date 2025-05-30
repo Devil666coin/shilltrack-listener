@@ -65,12 +65,11 @@ async def handler(event):
 
 async def main():
     await client.start()
-    print("Listener attivo...")
+    print("✅ Listener attivo...")
+    asyncio.create_task(post_classifica())  # spam classifica ogni 5 min
     await client.run_until_disconnected()
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(client.start())  # avvia il listener
-    loop.create_task(post_classifica())  # avvia lo spam automatico
-    loop.run_forever()
+    import asyncio
+    asyncio.run(main())
