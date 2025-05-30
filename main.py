@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime, timedelta
 from telethon import TelegramClient, events
 from dotenv import load_dotenv
+from poster import post_classifica
 
 # Carica variabili da .env
 load_dotenv()
@@ -69,4 +70,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.create_task(client.start())  # avvia il listener
+    loop.create_task(post_classifica())  # avvia lo spam automatico
+    loop.run_forever()
