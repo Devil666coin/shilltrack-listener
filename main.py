@@ -1,54 +1,31 @@
-import json
-import os
-import re
 import asyncio
-from datetime import datetime, timedelta
+import json
+import re
+from datetime import datetime
 from telethon import TelegramClient, events
-from dotenv import load_dotenv
+from config import API_ID, API_HASH
+from ranker import load_mentions, save_mentions, extract_mentions
 from poster import post_classifica
 
-# Carica variabili da .env
-load_dotenv()
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-SESSION_NAME = "session"
+# Crea client Telethon con il tuo account personale
+client = TelegramClient("sessione", API_ID, API_HASH)
 
-# File dove salviamo le menzioni
-MENTIONS_FILE = "mentions.json"
-
-# Pattern per riconoscere contract address Ethereum/BSC
-CA_PATTERN = re.compile(r"0x[a-fA-F0-9]{40}")
-
-# Pattern link Dexview, Dexscreener, CMC, ecc.
-LINK_PATTERNS = [
-    r"https://www\.dexview\.com/(eth|bsc)/0x[a-fA-F0-9]{40}",
-    r"https://dexscreener\.com/(eth|bsc)/0x[a-fA-F0-9]{40}",
-    r"https://coinmarketcap\.com/currencies/[\w\-]+/?"
+PATTERNS = [
+    r"(0x[a-fA-F0-9]{40})",                    # Contract address
+    r"(https:\/\/dexscreener\.com\/[^\s]+)",   # Link Dexscreener
 ]
-
-# Funzione per caricare il JSON esistente
-def load_mentions():
-    try:
-        with open(MENTIONS_FILE, "r") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
-# Funzione per salvare menzioni
-def save_mentions(data):
-    with open(MENTIONS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-
-# Inizializza client
-client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
 
 @client.on(events.NewMessage)
 async def handler(event):
-    text = event.raw_text
-    addresses = set(re.findall(CA_PATTERN, text))
+    if not event.message.message:
+        return
+
+    text = event.message.message
+    addresses = set()
     links = set()
 
-    for pattern in LINK_PATTERNS:
+    for pattern in PATTERNS:
+        addresses.update(re.findall(pattern, text))
         links.update(re.findall(pattern, text))
 
     if addresses or links:
@@ -65,16 +42,9 @@ async def handler(event):
 
 async def main():
     await client.start()
-    print("✅ Listener attivo...")
-    asyncio.create_task(post_classifica())  # spam classifica ogni 5 min
+    print("🎧 Listener attivo...")
+    asyncio.create_task(post_classifica())  # spam automatico classifica
     await client.run_until_disconnected()
 
-
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(client.start())         # Listener
-    loop.create_task(post_classifica())      # Spam automatico
-    loop.run_forever()
-    
-    import asyncio
     asyncio.run(main())
