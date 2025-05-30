@@ -36,4 +36,7 @@ def generate_ranking():
         })
 
     save_ranking(final_ranking)
-    
+
+def save_mentions(mentions):
+    with open(MENTIONS_FILE, "w") as f:
+        json.dump(mentions, f, indent=2)
