@@ -36,8 +36,4 @@ def generate_ranking():
         })
 
     save_ranking(final_ranking)
-
-if name == "__main__":
-    while True:
-        generate_ranking()
-        time.sleep(30)
+    

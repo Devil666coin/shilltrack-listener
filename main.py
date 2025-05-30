@@ -6,6 +6,7 @@ from telethon import TelegramClient, events
 from config import API_ID, API_HASH
 from ranker import load_mentions, save_mentions, extract_mentions
 from poster import post_classifica
+from telethon.sync import TelegramClient
 
 # Crea client Telethon con il tuo account personale
 client = TelegramClient("sessione", API_ID, API_HASH)
@@ -13,7 +14,7 @@ client = TelegramClient("sessione", API_ID, API_HASH)
 PATTERNS = [
     r"(0x[a-fA-F0-9]{40})",                    # Contract address
     r"(https:\/\/dexscreener\.com\/[^\s]+)",   # Link Dexscreener
-]
+]from telethon.sync import TelegramClient
 
 @client.on(events.NewMessage)
 async def handler(event):
@@ -47,4 +48,8 @@ async def main():
     await client.run_until_disconnected()
 
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.create_task(client.start())  # avvia il listener
+    loop.create_task(post_classifica())  # spam automatico
+    loop.run_forever()
     asyncio.run(main())
