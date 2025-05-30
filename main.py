@@ -14,7 +14,7 @@ client = TelegramClient("sessione", API_ID, API_HASH)
 PATTERNS = [
     r"(0x[a-fA-F0-9]{40})",                    # Contract address
     r"(https:\/\/dexscreener\.com\/[^\s]+)",   # Link Dexscreener
-]from telethon.sync import TelegramClient
+]
 
 @client.on(events.NewMessage)
 async def handler(event):
