@@ -71,5 +71,10 @@ async def main():
 
 
 if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.create_task(client.start())         # Listener
+    loop.create_task(post_classifica())      # Spam automatico
+    loop.run_forever()
+    
     import asyncio
     asyncio.run(main())

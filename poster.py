@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 # Inizializza il bot
-bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(token=BOT_TOKEN)  # ✅ OK
 
 async def post_classifica():
     with open("ranking.json", "r") as f:
@@ -25,4 +25,4 @@ async def post_classifica():
 
     messaggio += "\nPowered by @ShillTrackBot"
 
-    await bot.send_message(chat_id=CHANNEL_ID, text=messaggio)
+    await bot.send_message(chat_id=CHANNEL_ID, text=messaggio, parse_mode="HTML")  # ✅ OK
