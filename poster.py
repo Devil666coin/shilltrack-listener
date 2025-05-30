@@ -1,50 +1,28 @@
-import asyncio
-import json
-import logging
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.enums import ParseMode
+from aiogram import Bot
+from aiogram.types import ParseMode
 from config import BOT_TOKEN, CHANNEL_ID
+import json
+from datetime import datetime
 
-logging.basicConfig(level=logging.INFO)
-
-bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
-dp = Dispatcher()
-
-RANKING_FILE = "ranking.json"
-
-def load_ranking():
-    try:
-        with open(RANKING_FILE, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        logging.error(f"Errore nel caricamento della classifica: {e}")
-        return []
-
-def format_ranking(ranking):
-    if not ranking:
-        return "📊 <b>Nessuna menzione registrata</b>"
-
-    lines = ["🔥 <b>Top Tokens (24h)</b>\n"]
-    for i, item in enumerate(ranking, 1):
-        ca = item["address"]
-        count = item["count"]
-        lines.append(f"{i}. <code>{ca}</code> — <b>{count} mentions</b>")
-    lines.append("\n📡 Powered by <a href='https://t.me/ShillTrackBot'>ShillTrack</a>")
-    return "\n".join(lines)
+# Inizializza il bot SENZA parse_mode (versione 3.x)
+bot = Bot(token=BOT_TOKEN)
 
 async def post_classifica():
-    while True:
-        ranking = load_ranking()
-        text = format_ranking(ranking)
+    with open("ranking.json", "r") as f:
+        data = json.load(f)
 
-        try:
-            await bot.send_message(CHANNEL_ID, text)
-            logging.info("✅ Classifica inviata su Telegram.")
-        except Exception as e:
-            logging.error(f"❌ Errore nell'invio: {e}")
+    if not data:
+        return
 
-        await asyncio.sleep(300)  # 5 minuti
+    now = datetime.now().strftime("%d/%m/%Y %H:%M")
+    messaggio = f"<b>🔥 TOP MENTIONED BSC TOKENS — {now}</b>\n\n"
 
-if __name__ == "__main__":
-    asyncio.run(post_classifica())
+    for i, entry in enumerate(data, start=1):
+        name = entry["name"]
+        symbol = entry["symbol"]
+        mentions = entry["mentions"]
+        messaggio += f"<b>{i}.</b> {name} ({symbol}) — {mentions} mentions\n"
+
+    messaggio += "\nPowered by @ShillTrackBot"
+
+    await bot.send_message(chat_id=CHANNEL_ID, text=messaggio, parse_mode="HTML")
