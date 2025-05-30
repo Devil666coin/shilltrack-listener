@@ -4,8 +4,8 @@ from config import BOT_TOKEN, CHANNEL_ID
 import json
 from datetime import datetime
 
-# Inizializza il bot SENZA parse_mode (versione 3.x)
-bot = Bot(token=BOT_TOKEN)
+# Inizializza il bot
+bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
 
 async def post_classifica():
     with open("ranking.json", "r") as f:
@@ -15,14 +15,14 @@ async def post_classifica():
         return
 
     now = datetime.now().strftime("%d/%m/%Y %H:%M")
-    messaggio = f"<b>🔥 TOP MENTIONED BSC TOKENS — {now}</b>\n\n"
+    messaggio = f"<b>🔥 TOP MENTIONED BSC TOKENS – {now}</b>\n\n"
 
     for i, entry in enumerate(data, start=1):
         name = entry["name"]
         symbol = entry["symbol"]
         mentions = entry["mentions"]
-        messaggio += f"<b>{i}.</b> {name} ({symbol}) — {mentions} mentions\n"
+        messaggio += f"<b>{i}.</b> {name} ({symbol}) – {mentions} mentions\n"
 
     messaggio += "\nPowered by @ShillTrackBot"
 
-    await bot.send_message(chat_id=CHANNEL_ID, text=messaggio, parse_mode="HTML")
+    await bot.send_message(chat_id=CHANNEL_ID, text=messaggio)
