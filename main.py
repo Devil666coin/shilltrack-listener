@@ -6,7 +6,7 @@ from telethon import TelegramClient, events
 from config import API_ID, API_HASH
 from ranker import load_mentions, save_mentions, extract_mentions
 from poster import post_classifica
-from telethon.sync import TelegramClient
+
 
 # Crea client Telethon con il tuo account personale
 client = TelegramClient("sessione", API_ID, API_HASH)
