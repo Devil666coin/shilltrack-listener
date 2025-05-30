@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from telethon import TelegramClient, events
 from config import API_ID, API_HASH
-from ranker import load_mentions, save_mentions, extract_mentions
+from ranker import load_mentions, save_mentions
 from poster import post_classifica
 
 
