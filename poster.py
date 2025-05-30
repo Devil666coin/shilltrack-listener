@@ -1,5 +1,5 @@
 from aiogram import Bot
-from aiogram.types import ParseMode
+from aiogram.enums import ParseMode
 from config import BOT_TOKEN, CHANNEL_ID
 import json
 from datetime import datetime
