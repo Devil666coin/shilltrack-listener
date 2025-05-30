@@ -3,20 +3,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 🔐 Config sensibili
+# Configurazioni sensibili
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 SESSION_NAME = os.getenv("SESSION_NAME", "anon")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# 🛡️ Protezione robusta per CHANNEL_ID
-raw_channel_id = os.getenv("CHANNEL_ID")
-if not raw_channel_id:
+CHANNEL_ID_RAW = os.getenv("CHANNEL_ID")
+if CHANNEL_ID_RAW is None:
     raise ValueError("❌ Variabile CHANNEL_ID mancante nelle env di Railway")
-try:
-    CHANNEL_ID = int(raw_channel_id)
-except ValueError:
-    raise ValueError("❌ CHANNEL_ID non è un numero valido (int)")
+CHANNEL_ID = int(CHANNEL_ID_RAW)
 
-# 📁 Path file
+# File di storage
 MENTIONS_FILE = "mentions.json"
+RANKING_FILE = "ranking.json"
