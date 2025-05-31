@@ -42,9 +42,9 @@ async def handler(event):
         print(f"Menzione registrata: {addresses} | {links}")
 
 async def main():
-    await client.start()
+    await client.start()  # ✅ CORRETTO: attende l'avvio del client
     print("✅ Listener attivo...")
-    asyncio.create_task(post_classifica())  # spam automatico classifica
+    asyncio.create_task(post_classifica())  # Assicura che sia coroutine
     await client.run_until_disconnected()
 
 
