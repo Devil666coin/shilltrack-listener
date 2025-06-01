@@ -8,7 +8,9 @@ API_ID_STR = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
 CHANNEL_ID_STR = os.getenv("CHANNEL_ID")
-
+SESSION_NAME = os.getenv("SESSION_NAME", "anon")
+MONITORED_GROUPS_STR = os.getenv("MONITORED_GROUPS", "")
+MONITORED_GROUPS = [int(g.strip()) for g in MONITORED_GROUPS_STR.split(",") if g.strip()]
 # Funzione di pulizia ID
 def normalize_id_string(raw: str) -> str:
     return ''.join(c for c in raw if c.isdigit() or c == '-')
