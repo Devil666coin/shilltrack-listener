@@ -6,7 +6,7 @@ load_dotenv()
 # Caricamento variabili da ambiente
 API_ID_STR = os.getenv("API_ID")
 API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
 CHANNEL_ID_STR = os.getenv("CHANNEL_ID")
 
 # Funzione di pulizia ID

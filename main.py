@@ -1,52 +1,59 @@
-import asyncio
 import json
-import re
-from datetime import datetime
+import asyncio
+from datetime import datetime, timedelta
 from telethon import TelegramClient, events
-from config import API_ID, API_HASH
-from ranker import load_mentions, save_mentions
+from config import API_ID, API_HASH, SESSION_NAME, MONITORED_GROUPS
+from ranker import update_ranking
 from poster import post_classifica
 
-
-# Crea client Telethon con il tuo account personale
-client = TelegramClient("sessione", API_ID, API_HASH)
-
-PATTERNS = [
-    r"(0x[a-fA-F0-9]{40})",                    # Contract address
-    r"(https:\/\/dexscreener\.com\/[^\s]+)",   # Link Dexscreener
-]
+client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
 
 @client.on(events.NewMessage)
 async def handler(event):
-    if not event.message.message:
-        return
+    try:
+        if event.chat_id not in MONITORED_GROUPS:
+            return
 
-    text = event.message.message
-    addresses = set()
-    links = set()
+        text = event.message.message
+        if not text:
+            return
 
-    for pattern in PATTERNS:
-        addresses.update(re.findall(pattern, text))
-        links.update(re.findall(pattern, text))
+        # Cerca contract address o link rilevanti
+        lowered = text.lower()
+        if "bscscan.com/token/" in lowered or "dexscreener.com" in lowered or "0x" in lowered:
+            mention = {
+                "timestamp": datetime.utcnow().isoformat(),
+                "chat_id": event.chat_id,
+                "message_id": event.message.id,
+                "text": text
+            }
 
-    if addresses or links:
-        mentions = load_mentions()
-        mentions.append({
-            "timestamp": datetime.utcnow().isoformat(),
-            "chat_id": event.chat_id,
-            "addresses": list(addresses),
-            "links": list(links),
-            "text": text
-        })
-        save_mentions(mentions)
-        print(f"Menzione registrata: {addresses} | {links}")
+            with open("mentions.json", "r+") as f:
+                data = json.load(f)
+                data.append(mention)
+                f.seek(0)
+                json.dump(data, f, indent=2)
+                f.truncate()
+
+            print("✅ Menzione registrata")
+            await update_ranking()
+
+    except Exception as e:
+        print(f"❌ Errore handler: {e}")
+
+async def start_spam():
+    while True:
+        try:
+            await post_classifica()
+        except Exception as e:
+            print(f"❌ Errore nello spam della classifica: {e}")
+        await asyncio.sleep(300)  # ogni 5 minuti
 
 async def main():
-    await client.start()  # ✅ CORRETTO: attende l'avvio del client
-    print("✅ Listener attivo...")
-    asyncio.create_task(post_classifica())  # Assicura che sia coroutine
+    asyncio.create_task(start_spam())
+    await client.start()
+    print("🚀 Listener avviato")
     await client.run_until_disconnected()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

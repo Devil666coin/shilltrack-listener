@@ -1,28 +1,25 @@
-from aiogram import Bot
-from aiogram.enums import ParseMode
-from config import BOT_TOKEN, CHANNEL_ID
 import json
-from datetime import datetime
-
-# Inizializza il bot
-bot = Bot(token=BOT_TOKEN)  # ✅ OK
+from config import CHANNEL_ID, BOT_TOKEN
+from aiogram import Bot
 
 async def post_classifica():
-    with open("ranking.json", "r") as f:
-        data = json.load(f)
+    try:
+        with open("ranking.json", "r") as f:
+            data = json.load(f)
 
-    if not data:
-        return
+        if not data:
+            print("⚠️ Classifica vuota.")
+            return
 
-    now = datetime.now().strftime("%d/%m/%Y %H:%M")
-    messaggio = f"<b>🔥 TOP MENTIONED BSC TOKENS – {now}</b>\n\n"
+        msg = "🔥 Top Shilled Tokens (24h) 🔥\n\n"
+        for i, token in enumerate(data[:10], 1):
+            symbol = token.get("symbol", "N/A")
+            count = token.get("count", 0)
+            msg += f"{i}. {symbol} – {count} mentions\n"
 
-    for i, entry in enumerate(data, start=1):
-        name = entry["name"]
-        symbol = entry["symbol"]
-        mentions = entry["mentions"]
-        messaggio += f"<b>{i}.</b> {name} ({symbol}) – {mentions} mentions\n"
+        bot = Bot(token=BOT_TOKEN, parse_mode="Markdown")
+        await bot.send_message(chat_id=CHANNEL_ID, text=msg)
+        print("✅ Classifica inviata")
 
-    messaggio += "\nPowered by @ShillTrackBot"
-
-    await bot.send_message(chat_id=CHANNEL_ID, text=messaggio, parse_mode="HTML")  # ✅ OK
+    except Exception as e:
+        print(f"❌ Errore post_classifica: {e}")
