@@ -3,9 +3,11 @@ import time
 from datetime import datetime, timedelta
 from collections import Counter
 from dateutil.parser import isoparse
+import os
 
-MENTIONS_FILE = "mentions.json"
-RANKING_FILE = "ranking.json"
+VOLUME_DIR = "/mnt/data"
+MENTIONS_FILE = os.path.join(VOLUME_DIR, "mentions.json")
+RANKING_FILE = os.path.join(VOLUME_DIR, "ranking.json")
 TIME_WINDOW_HOURS = 24
 
 def load_mentions():
