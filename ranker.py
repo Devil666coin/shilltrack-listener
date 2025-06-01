@@ -20,23 +20,18 @@ def save_ranking(ranking):
         json.dump(ranking, f, indent=2)
 
 def generate_ranking(mentions):
-    now = time.time()
-    cutoff = now - TIME_WINDOW_HOURS * 3600
+    now = datetime.utcnow()
+    cutoff = now - timedelta(hours=TIME_WINDOW_HOURS)
 
-    filtered = []
-    for m in mentions:
-        try:
-            ts = isoparse(m["timestamp"]).timestamp()
-            if ts > cutoff:
-                filtered.append(m["address"])
-        except Exception:
-            continue
+    filtered = [
+        m["address"] for m in mentions
+        if datetime.fromisoformat(m["timestamp"]) > cutoff
+    ]
 
     count = Counter(filtered)
-    ranking = count.most_common()
-
     final_ranking = []
-    for i, (address, total) in enumerate(ranking, 1):
+
+    for i, (address, total) in enumerate(count.most_common(), 1):
         final_ranking.append({
             "position": i,
             "address": address,
