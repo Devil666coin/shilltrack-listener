@@ -1,36 +1,42 @@
 import os
 import json
-import time
 from datetime import datetime, timedelta
 from collections import Counter
 from dateutil.parser import isoparse
 
-# Percorso volume
 VOLUME_DIR = "/mnt/data"
 MENTIONS_FILE = os.path.join(VOLUME_DIR, "mentions.json")
 RANKING_FILE = os.path.join(VOLUME_DIR, "ranking.json")
 TIME_WINDOW_HOURS = 24
 
 def ensure_files_exist():
-    """Crea i file se non esistono, per evitare crash al primo avvio"""
-    if not os.path.exists(MENTIONS_FILE):
-        with open(MENTIONS_FILE, "w") as f:
-            json.dump([], f)
+    """Crea mentions.json e ranking.json se non esistono"""
+    try:
+        os.makedirs(VOLUME_DIR, exist_ok=True)
+        if not os.path.exists(MENTIONS_FILE):
+            with open(MENTIONS_FILE, "w") as f:
+                json.dump([], f)
 
-    if not os.path.exists(RANKING_FILE):
-        with open(RANKING_FILE, "w") as f:
-            json.dump([], f)
+        if not os.path.exists(RANKING_FILE):
+            with open(RANKING_FILE, "w") as f:
+                json.dump([], f)
+    except Exception as e:
+        print("Errore creazione file:", e)
 
 def load_mentions():
     try:
         with open(MENTIONS_FILE, "r") as f:
             return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except Exception as e:
+        print("Errore lettura mentions:", e)
         return []
 
 def save_ranking(ranking):
-    with open(RANKING_FILE, "w") as f:
-        json.dump(ranking, f, indent=2)
+    try:
+        with open(RANKING_FILE, "w") as f:
+            json.dump(ranking, f, indent=2)
+    except Exception as e:
+        print("Errore salvataggio ranking:", e)
 
 def generate_ranking(mentions):
     now = datetime.utcnow()
