@@ -10,6 +10,11 @@ MENTIONS_FILE = os.path.join(VOLUME_DIR, "mentions.json")
 RANKING_FILE = os.path.join(VOLUME_DIR, "ranking.json")
 TIME_WINDOW_HOURS = 24
 
+# Crea il file vuoto se non esiste
+if not os.path.exists(RANKING_FILE):
+    with open(RANKING_FILE, "w") as f:
+        json.dump([], f)
+
 def load_mentions():
     try:
         with open(MENTIONS_FILE, "r") as f:
