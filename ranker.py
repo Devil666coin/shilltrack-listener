@@ -18,17 +18,15 @@ def save_ranking(ranking):
     with open(RANKING_FILE, "w") as f:
         json.dump(ranking, f, indent=2)
 
-def generate_ranking():
+def generate_ranking(mentions):
     now = time.time()
     cutoff = now - TIME_WINDOW_HOURS * 3600
-    mentions = load_mentions()
 
     filtered = [m["address"] for m in mentions if m["timestamp"] > cutoff]
     count = Counter(filtered)
-    ranking = count.most_common()
 
     final_ranking = []
-    for i, (address, total) in enumerate(ranking, 1):
+    for i, (address, total) in enumerate(count.most_common(), 1):
         final_ranking.append({
             "position": i,
             "address": address,
@@ -37,6 +35,6 @@ def generate_ranking():
 
     save_ranking(final_ranking)
 
-def save_mentions(mentions):
-    with open(MENTIONS_FILE, "w") as f:
-        json.dump(mentions, f, indent=2)
+def update_ranking():
+    mentions = load_mentions()
+    generate_ranking(mentions)   
