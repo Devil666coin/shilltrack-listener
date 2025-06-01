@@ -10,7 +10,11 @@ MENTIONS_FILE = os.path.join(VOLUME_DIR, "mentions.json")
 RANKING_FILE = os.path.join(VOLUME_DIR, "ranking.json")
 TIME_WINDOW_HOURS = 24
 
-# Crea il file vuoto se non esiste
+# 🔧 Crea i file vuoti se non esistono
+if not os.path.exists(MENTIONS_FILE):
+    with open(MENTIONS_FILE, "w") as f:
+        json.dump([], f)
+
 if not os.path.exists(RANKING_FILE):
     with open(RANKING_FILE, "w") as f:
         json.dump([], f)
@@ -31,22 +35,23 @@ def generate_ranking(mentions):
     cutoff = now - timedelta(hours=TIME_WINDOW_HOURS)
 
     filtered = [
-        m["address"] for m in mentions
+        m for m in mentions
         if datetime.fromisoformat(m["timestamp"]) > cutoff
     ]
 
-    count = Counter(filtered)
+    count = Counter([m["address"] for m in filtered])
     final_ranking = []
 
-    for i, (address, total) in enumerate(count.most_common(), 1):
+    for i, (address, total) in enumerate(count.most_common(10), 1):
         final_ranking.append({
-            "position": i,
+            "rank": i,
             "address": address,
             "mentions": total
         })
 
-    save_ranking(final_ranking)
+    return final_ranking
 
 def update_ranking():
     mentions = load_mentions()
-    generate_ranking(mentions)
+    ranking = generate_ranking(mentions)
+    save_ranking(ranking)
