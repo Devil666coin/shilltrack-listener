@@ -3,8 +3,10 @@ import asyncio
 from datetime import datetime, timedelta
 from telethon import TelegramClient, events
 from config import API_ID, API_HASH, SESSION_NAME, MONITORED_GROUPS
-from ranker import update_ranking
+from ranker import generate_ranking
 from poster import post_classifica
+from ranker import update_ranking
+update_ranking()
 
 client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
 
