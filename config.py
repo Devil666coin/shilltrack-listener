@@ -3,29 +3,31 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+# Caricamento variabili da ambiente
 API_ID_STR = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_ID_STR = os.getenv("CHANNEL_ID")
 
-# ✅ DEBUG: stampa i valori grezzi
-print(f"🔍 RAW API_ID: '{API_ID_STR}'")
-print(f"🔍 RAW CHANNEL_ID: '{CHANNEL_ID_STR}'")
+# Funzione di pulizia ID
+def normalize_id_string(raw: str) -> str:
+    return ''.join(c for c in raw if c.isdigit() or c == '-')
 
-# Funzione per ripulire da caratteri strani
-def normalize_int_string(s):
-    return s.strip().replace("–", "-").replace("—", "-").replace(" ", "").replace("\u200b", "")
+# Controllo esistenza
+if not all([BOT_TOKEN, CHANNEL_ID_STR, API_ID_STR, API_HASH]):
+    raise ValueError("❌ Una o più variabili di ambiente mancano nelle envVars Railway!")
 
-# ✅ DEBUG: stampa i valori dopo normalizzazione
-print(f"✅ Normalized API_ID: '{normalize_int_string(API_ID_STR)}'")
-print(f"✅ Normalized CHANNEL_ID: '{normalize_int_string(CHANNEL_ID_STR)}'")
-
+# Parsing sicuro
 try:
-    API_ID = int(normalize_int_string(API_ID_STR))
-    CHANNEL_ID = int(normalize_int_string(CHANNEL_ID_STR))
+    print(f"🔍 Parsing API_ID: {API_ID_STR}")
+    print(f"🔍 Parsing CHANNEL_ID: {CHANNEL_ID_STR}")
+    API_ID = int(normalize_id_string(API_ID_STR))
+    CHANNEL_ID = int(normalize_id_string(CHANNEL_ID_STR))
+    print(f"✅ Normalized API_ID: {API_ID}")
+    print(f"✅ Normalized CHANNEL_ID: {CHANNEL_ID}")
 except Exception as e:
-    print(f"❌ Errore nel parsing API_ID/CHANNEL_ID: {e}")
-    raise ValueError("❌ API_ID o CHANNEL_ID non sono numeri validi (devono essere int)")
+    raise ValueError(f"❌ Errore nel parsing API_ID/CHANNEL_ID: {e}")
 
-# Percorsi dei file
+# File JSON
 MENTIONS_FILE = "mentions.json"
 RANKING_FILE = "ranking.json"
