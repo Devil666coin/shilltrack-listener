@@ -2,6 +2,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from collections import Counter
+from dateutil.parser import isoparse
 
 MENTIONS_FILE = "mentions.json"
 RANKING_FILE = "ranking.json"
@@ -22,11 +23,20 @@ def generate_ranking(mentions):
     now = time.time()
     cutoff = now - TIME_WINDOW_HOURS * 3600
 
-    filtered = [m["address"] for m in mentions if m["timestamp"] > cutoff]
+    filtered = []
+    for m in mentions:
+        try:
+            ts = isoparse(m["timestamp"]).timestamp()
+            if ts > cutoff:
+                filtered.append(m["address"])
+        except Exception:
+            continue
+
     count = Counter(filtered)
+    ranking = count.most_common()
 
     final_ranking = []
-    for i, (address, total) in enumerate(count.most_common(), 1):
+    for i, (address, total) in enumerate(ranking, 1):
         final_ranking.append({
             "position": i,
             "address": address,
@@ -37,4 +47,4 @@ def generate_ranking(mentions):
 
 def update_ranking():
     mentions = load_mentions()
-    generate_ranking(mentions)   
+    generate_ranking(mentions)
