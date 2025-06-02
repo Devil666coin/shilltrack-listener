@@ -1,61 +1,53 @@
-import json
 import asyncio
-from datetime import datetime, timedelta
+import json
+from datetime import datetime
 from telethon import TelegramClient, events
-from config import API_ID, API_HASH, SESSION_NAME, MONITORED_GROUPS
-from ranker import generate_ranking
-from poster import post_classifica
-from ranker import update_ranking
-update_ranking()
+from config import API_ID, API_HASH, CHANNEL_ID, MENTIONS_FILE, RANKING_FILE
+from ranker import update_ranking, save_mentions, load_mentions
 
-client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
+# Percorso assoluto della sessione salvata nel volume Railway
+SESSION_PATH = "/mnt/anon.session"
 
-@client.on(events.NewMessage)
+client = TelegramClient(SESSION_PATH, API_ID, API_HASH)
+
+
+@client.on(events.NewMessage(chats=CHANNEL_ID))
 async def handler(event):
-    try:
-        if event.chat_id not in MONITORED_GROUPS:
-            return
+    text = event.raw_text
+    mentions = load_mentions()
+    mentions.append({
+        "text": text,
+        "timestamp": datetime.utcnow().isoformat()
+    })
+    save_mentions(mentions)
+    print("✅ Menzione registrata")
 
-        text = event.message.message
-        if not text:
-            return
-
-        # Cerca contract address o link rilevanti
-        lowered = text.lower()
-        if "bscscan.com/token/" in lowered or "dexscreener.com" in lowered or "0x" in lowered:
-            mention = {
-                "timestamp": datetime.utcnow().isoformat(),
-                "chat_id": event.chat_id,
-                "message_id": event.message.id,
-                "text": text
-            }
-
-            with open("mentions.json", "r+") as f:
-                data = json.load(f)
-                data.append(mention)
-                f.seek(0)
-                json.dump(data, f, indent=2)
-                f.truncate()
-
-            print("✅ Menzione registrata")
-            await update_ranking()
-
-    except Exception as e:
-        print(f"❌ Errore handler: {e}")
-
-async def start_spam():
-    while True:
-        try:
-            await post_classifica()
-        except Exception as e:
-            print(f"❌ Errore nello spam della classifica: {e}")
-        await asyncio.sleep(300)  # ogni 5 minuti
 
 async def main():
-    asyncio.create_task(start_spam())
-    await client.start()
+    print(f"✅ Parsing API_ID: {API_ID}")
+    print(f"✅ Parsing CHANNEL_ID: {CHANNEL_ID}")
+    print(f"✅ Normalized API_ID: {int(API_ID)}")
+    print(f"✅ Normalized CHANNEL_ID: {int(CHANNEL_ID)}")
+
+    await client.connect()
+
+    if not await client.is_user_authorized():
+        print("❌ Sessione non autorizzata. Autenticarsi in locale.")
+        return
+
+    mentions = load_mentions()
+    print("📊 Classifica vuota" if not mentions else f"📊 Menzioni caricate: {len(mentions)}")
+
+    # Genera classifica iniziale
+    update_ranking()
+    print("✅ Ranking aggiornato correttamente.")
     print("🚀 Listener avviato")
+
     await client.run_until_disconnected()
 
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("🔴 Listener interrotto")

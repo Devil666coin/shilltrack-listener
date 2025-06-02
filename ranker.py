@@ -26,10 +26,15 @@ def ensure_files_exist():
 def load_mentions():
     try:
         with open(MENTIONS_FILE, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            if isinstance(data, dict):
+                return data
+            else:
+                print("⚠️ Il file mentions.json non è un dizionario.")
+                return {}
     except Exception as e:
         print("Errore lettura mentions:", e)
-        return []
+        return {}
 
 def save_ranking(ranking):
     try:
@@ -38,22 +43,27 @@ def save_ranking(ranking):
     except Exception as e:
         print("Errore salvataggio ranking:", e)
 
-def generate_ranking(mentions):
-    now = datetime.utcnow()
-    cutoff = now - timedelta(hours=TIME_WINDOW_HOURS)
-    filtered = [m for m in mentions if isoparse(m["timestamp"]) > cutoff]
+# ranker.py
+def generate_ranking(mentions, ranking_path):
+    try:
+        # Conta le occorrenze per ogni contract address
+        counts = {}
+        for mention in mentions:
+            ca = mention.get("contract")
+            if ca:
+                counts[ca] = counts.get(ca, 0) + 1
 
-    count = Counter([m["address"] for m in filtered])
-    final_ranking = []
+        # Ordina per numero di menzioni (discendente) e prendi i top 10
+        top = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:10]
 
-    for i, (address, total) in enumerate(count.most_common(), 1):
-        final_ranking.append({
-            "rank": i,
-            "address": address,
-            "mentions": total
-        })
+        # Salva il ranking su file
+        with open(ranking_path, "w") as f:
+            json.dump(top, f, indent=2)
 
-    save_ranking(final_ranking)
+        print("✅ Ranking aggiornato correttamente.")
+
+    except Exception as e:
+        print("Errore durante la generazione del ranking:", e)
 
 def update_ranking():
     ensure_files_exist()
