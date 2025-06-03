@@ -1,13 +1,14 @@
+import shutil
 import os
 
-# CREA LA CARTELLA /mnt SE NON ESISTE
-os.makedirs("/mnt", exist_ok=True)
+# File di sessione locale (già valido)
+LOCAL_SESSION = "anon.session"
 
-# COPIA IL FILE
-with open("anon.session", "rb") as f_in:
-    content = f_in.read()
+# Percorso corretto nel volume Railway
+RAILWAY_SESSION = "/mnt/anon.session"
 
-with open("/mnt/anon.session", "wb") as f_out:
-    f_out.write(content)
-
-print("✅ File copiato su /mnt/anon.session")
+if os.path.exists(LOCAL_SESSION):
+    shutil.copyfile(LOCAL_SESSION, RAILWAY_SESSION)
+    print("✅ Sessione copiata su Railway (/mnt/anon.session)")
+else:
+    print("❌ File locale 'anon.session' non trovato")

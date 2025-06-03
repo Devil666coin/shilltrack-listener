@@ -23,7 +23,7 @@ def ensure_files_exist():
     except Exception as e:
         print("Errore creazione file:", e)
 
-def load_mentions():
+def load_mentions(path=MENTIONS_FILE):
     try:
         with open(MENTIONS_FILE, "r") as f:
             data = json.load(f)
@@ -35,6 +35,11 @@ def load_mentions():
     except Exception as e:
         print("Errore lettura mentions:", e)
         return {}
+
+def save_mentions(mentions: list, path: str = "mentions.json"):
+    import json
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(mentions, f, ensure_ascii=False, indent=2)
 
 def save_ranking(ranking):
     try:

@@ -7,6 +7,8 @@ from ranker import update_ranking, save_mentions, load_mentions
 
 # Percorso assoluto della sessione salvata nel volume Railway
 SESSION_PATH = "/mnt/anon.session"
+import os
+print(f"📂 Verifica file sessione su Railway: {SESSION_PATH} – Esiste: {os.path.exists(SESSION_PATH)}")
 
 client = TelegramClient(SESSION_PATH, API_ID, API_HASH)
 
