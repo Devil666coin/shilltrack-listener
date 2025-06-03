@@ -1,2 +1,4 @@
-.env
-!sessione.session
+# Ignora tutto tranne sessione e variabili
+*
+!anon.session
+!.env
